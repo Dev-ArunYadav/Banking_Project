@@ -4,6 +4,12 @@ import com.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findBySystemAdminId(String systemAdminId);
+    Optional<User> findByCustomerId(Long customerId);
+    Optional<User> findByBankEmployeeId(Long bankEmployeeId);
+    Optional<User> findByEmail(String email);
 }

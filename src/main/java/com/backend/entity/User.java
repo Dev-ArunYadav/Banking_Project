@@ -6,8 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name = "users")
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -16,14 +16,22 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(name = "customer_id")
     private Long customerId;
+
     @Column(name = "bank_employee_id")
     private Long bankEmployeeId;
-    @Column(name = "system_admin_id")
-    private Long systemAdminId;
-    private String password;
-    private EnunRole role; // CUSTOMER, BANK_EMPLOYEE, SYSTEM_ADMIN
 
-    // Getters and Setters
+    @Column(name = "system_admin_id")
+    private String systemAdminId;
+
+    @Column(name = "password", nullable = false)
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private EnunRole role;
+
+    private LocalDateTime lastLogin;
 }
