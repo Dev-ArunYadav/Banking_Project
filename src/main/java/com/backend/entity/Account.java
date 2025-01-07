@@ -19,17 +19,47 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String accountNumber;
+//    To open the account required Details of Users
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @Column(name = "account_name")
     private String accountName;
-    private String accountType;
-    private String branchName;
-    private String ifscCode;
-    private String address;
-    private String contactNumber;
-    private String emailId;
-    private String fullName;
+
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "last_name")
+    private String lastName;
+
+    @Column(name = "gender")
+    private String gender;
+
+    @Column(name = "date_of_birth")
+    private String dateOfBirth;
+
+    @Column(name = "email")
     private String email;
-    private String mobile;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "city")
+    private String city;
+
+    @Column(name = "state")
+    private String state;
+
+    @Column(name = "country")
+    private String country;
+
+    @Column(name = "pincode")
+    private String pincode;
+
     private String panCardNumber;
     private String aadhaarNumber;
 
@@ -45,14 +75,41 @@ public class Account {
     @Lob
     private byte[] electricityBillImage;
 
-    private LocalDateTime registrationDate;
-    private String accountStatus;
+//    Account Details
+
+    @Column(name = "bank_name")
     private String bankName;
+
+    @Column(name = "account_number")
+    private String accountNumber;
+
+    @Column(name = "branch_name")
+    private String branchName;
+
+    @Column(name = "ifsc_code")
+    private String ifscCode;
+
+    @Column(name = "account_type")
+    private EnumAccountType accountType;
+
+    @Column(name = "currency")
+    private String currency = "INR";
+
+    @Column(name = "balance")
+    private Double balance;
+
     private String bankAddress;
     private String bankContactNumber;
     private String bankEmail;
-    private String bankFullName;
-    private String bankEmailId;
-    private String bankMobile;
+
+    @Column(name = "status")
+    private EnumAccountStatus status;
+
+    @Column(name = "registration_date")
+    private LocalDateTime registrationDate;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
 
 }
