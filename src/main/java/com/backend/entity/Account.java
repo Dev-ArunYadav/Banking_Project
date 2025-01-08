@@ -24,14 +24,8 @@ public class Account {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name = "account_name")
-    private String accountName;
-
-    @Column(name = "first_name")
-    private String firstName;
-
-    @Column(name = "last_name")
-    private String lastName;
+    @Column(name = "account_holder")
+    private String accountHolder;
 
     @Column(name = "gender")
     private String gender;
@@ -91,9 +85,6 @@ public class Account {
 
     @Column(name = "account_type")
     private EnumAccountType accountType;
-
-    @Column(name = "currency")
-    private String currency = "INR";
 
     @Column(name = "balance")
     private Double balance;
