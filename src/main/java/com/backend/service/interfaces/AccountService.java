@@ -1,14 +1,11 @@
 package com.backend.service.interfaces;
 
-import com.backend.dto.request.AccountCreationRequestDTO;
-import com.backend.dto.response.AccountCreationResponseDTO;
-import com.backend.entity.Account;
+import com.backend.dto.request.AccountCreationRequest;
+import com.backend.model.Account;
 
-import java.util.Optional;
+import java.io.IOException;
 
 public interface AccountService {
-    AccountCreationResponseDTO createAccount(AccountCreationRequestDTO request);
-    void validateAccountDetails(AccountCreationRequestDTO request);
-    Optional<Account> findByAccountNumber(String accountNumber);
-    Optional<Account> findByCustomerId(String customerId);
+
+    Account createAccount(AccountCreationRequest request) throws IOException;
 }

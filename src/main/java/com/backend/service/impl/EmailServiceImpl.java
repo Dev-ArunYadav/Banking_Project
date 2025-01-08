@@ -1,89 +1,63 @@
 package com.backend.service.impl;
 
-import com.backend.entity.Account;
-import com.backend.exception.EmailSendException;
-import com.backend.model.AccountCredentials;
+import com.backend.model.Account;
 import com.backend.service.interfaces.EmailService;
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 @Service
-@RequiredArgsConstructor
-@Slf4j
-
 public class EmailServiceImpl implements EmailService {
-    private final JavaMailSender mailSender;
+
+    @Autowired
+    private JavaMailSender mailSender;
+
+    @Autowired
+    private TemplateEngine templateEngine;
+
 
     @Override
-    public void sendWelcomeEmail(Account account, AccountCredentials credentials) {
-        String subject = "Welcome to YBank - Account Created Successfully!";
-        String body = generateWelcomeEmailContent(account, credentials);
-
+    public void sendCredentialsEmail(String email, Long customerId, String password) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            Context context = new Context();
+            context.setVariable("customerId", customerId);
+            context.setVariable("password", password);
 
-            helper.setTo(account.getEmail());
-            helper.setSubject(subject);
-            helper.setText(body, true);
+            String htmlContent = templateEngine.process("credentials-email", context);
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setTo(email);
+            helper.setSubject("Your Banking Credentials");
+            helper.setText(htmlContent, true);
 
             mailSender.send(message);
-            log.info("Welcome email sent successfully to {}", account.getEmail());
-        } catch (Exception e) {
-            log.error("Failed to send welcome email: {}", e.getMessage());
-            throw new EmailSendException("Failed to send welcome email", e);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send credentials email", e);
         }
     }
-
     @Override
-    public void sendOtp(String email, String otp) {
+    public void sendAccountDetailsEmail(Account account) {
+        try {
+            Context context = new Context();
+            context.setVariable("account", account);
 
-    }
+            String htmlContent = templateEngine.process("account-details-email", context);
 
-    @Override
-    public void sendPasswordResetEmail(String email, String resetToken) {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setTo(account.getEmail());
+            helper.setSubject("Your Account Details");
+            helper.setText(htmlContent, true);
 
-    }
-
-    private String generateWelcomeEmailContent(Account account, AccountCredentials credentials) {
-        return """
-            <html>
-            <body>
-                <h2>Welcome to YBank!</h2>
-                <p>Dear %s,</p>
-                <p>Your bank account has been created successfully.</p>
-                
-                <h3>Account Details:</h3>
-                <ul>
-                    <li>Customer ID: %s</li>
-                    <li>Account Number: %s</li>
-                    <li>IFSC Code: %s</li>
-                    <li>Branch: %s</li>
-                </ul>
-                
-                <h3>Online Banking Credentials:</h3>
-                <ul>
-                    <li>Customer ID: %s</li>
-                    <li>Temporary Password: %s</li>
-                </ul>
-                
-                <p>Please login to our online banking portal and change your password immediately.</p>
-                
-                <p>Best Regards,<br>YBank Team</p>
-            </body>
-            </html>
-            """.formatted(
-                account.getAccountHolder(),
-                credentials.getCustomerId(),
-                credentials.getAccountNumber(),
-                account.getIfscCode(),
-                account.getBranchName(),
-                credentials.getCustomerId(),
-                credentials.getTemporaryPassword()
-        );
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send account details email", e);
+        }
     }
 }

@@ -1,5 +1,7 @@
-package com.backend.entity;
+package com.backend.model;
 
+import com.backend.enums.EnumTransactionStatus;
+import com.backend.enums.EnumTransactionType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

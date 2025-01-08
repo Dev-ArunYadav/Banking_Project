@@ -1,100 +1,95 @@
 package com.backend.service.impl;
 
-import com.backend.dto.request.AccountCreationRequestDTO;
-import com.backend.dto.response.AccountCreationResponseDTO;
-import com.backend.entity.Account;
-import com.backend.entity.EnumAccountStatus;
-import com.backend.entity.EnunRole;
-import com.backend.entity.User;
-import com.backend.exception.AccountCreationException;
-import com.backend.mapper.AccountMapper;
-import com.backend.model.AccountCredentials;
+import com.backend.dto.request.AccountCreationRequest;
+import com.backend.enums.EnumAccountStatus;
+import com.backend.model.Account;
+import com.backend.model.User;
 import com.backend.repository.AccountRepository;
-import com.backend.repository.UserRepository;
 import com.backend.service.interfaces.AccountService;
-import com.backend.util.Constants;
-import com.backend.util.IdGenerator;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.Random;
 
 @Service
-@Transactional
-@RequiredArgsConstructor
-@Slf4j
 public class AccountServiceImpl implements AccountService {
-    private final AccountRepository accountRepository;
-    private final UserRepository userRepository;
-    private final EmailServiceImpl emailService;
-    private final IdGenerator idGenerator;
-    private final AccountMapper accountMapper;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private AccountRepository accountRepository;
+
+    @Autowired
+    private UserServiceImpl userService;
 
     @Override
-    public AccountCreationResponseDTO createAccount(AccountCreationRequestDTO request) {
-        log.info("Starting account creation process for {}", request.getEmail());
+    @Transactional
+    public Account createAccount(AccountCreationRequest request) throws IOException {
+        Account account = new Account();
 
-        validateAccountDetails(request);
-        AccountCredentials credentials = idGenerator.generateCredentials();
+        // Set personal details
+        account.setAccountHolder(request.getAccountHolder());
+        account.setGender(request.getGender());
+        account.setDateOfBirth(request.getDateOfBirth());
+        account.setEmail(request.getEmail());
+        account.setPhoneNumber(request.getPhoneNumber());
+        account.setAddress(request.getAddress());
+        account.setCity(request.getCity());
+        account.setState(request.getState());
+        account.setCountry(request.getCountry());
+        account.setPincode(request.getPincode());
 
-        Account account = accountMapper.toEntity(request);
-        enrichAccountDetails(account, credentials);
-        Account savedAccount = accountRepository.save(account);
+        // Set document details
+        account.setPanCardNumber(request.getPanCardNumber());
+        account.setAadhaarNumber(request.getAadhaarNumber());
 
-        try {
-            User user = createUserForAccount(credentials);
-            savedAccount.setUser(user);
-            savedAccount = accountRepository.save(savedAccount);
-
-            emailService.sendWelcomeEmail(savedAccount, credentials);
-            log.info("Account created successfully for {}", request.getEmail());
-
-            return accountMapper.toResponseDTO(savedAccount, credentials);
-        } catch (Exception e) {
-            log.error("Failed to create user for account: {}", e.getMessage());
-            accountRepository.delete(savedAccount);
-            throw new AccountCreationException("Failed to complete account creation", e);
+        // Handle document uploads
+        if (request.getPassportPhoto() != null) {
+            account.setPassportPhoto(request.getPassportPhoto().getBytes());
         }
-    }
+        if (request.getPanCardImage() != null) {
+            account.setPanCardImage(request.getPanCardImage().getBytes());
+        }
+        if (request.getAadhaarCardImage() != null) {
+            account.setAadhaarCardImage(request.getAadhaarCardImage().getBytes());
+        }
+        if (request.getElectricityBillImage() != null) {
+            account.setElectricityBillImage(request.getElectricityBillImage().getBytes());
+        }
 
-    @Override
-    public void validateAccountDetails(AccountCreationRequestDTO request) {
-
-    }
-
-    @Override
-    public Optional<Account> findByAccountNumber(String accountNumber) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Account> findByCustomerId(String customerId) {
-        return Optional.empty();
-    }
-
-    private User createUserForAccount(AccountCredentials credentials) {
-        User user = new User();
-        user.setCustomerId(Long.parseLong(credentials.getCustomerId()));
-        user.setPassword(passwordEncoder.encode(credentials.getTemporaryPassword()));
-        user.setRole(EnunRole.CUSTOMER);
-        return userRepository.save(user);
-    }
-
-    private void enrichAccountDetails(Account account, AccountCredentials credentials) {
-        account.setAccountNumber(credentials.getAccountNumber());
-        account.setBankName(Constants.BANK_NAME);
-        account.setBranchName(Constants.MAIN_BRANCH);
-        account.setIfscCode(Constants.IFSC_CODE);
-        account.setStatus(EnumAccountStatus.PENDING);
-        account.setRegistrationDate(LocalDateTime.now());
+        // Set bank details
+        account.setBankName("Lakshmi Cheatfund Bank");
+        account.setAccountNumber(generateAccountNumber());
+        account.setBranchName("Main Branch");
+        account.setIfscCode("LKSMI0001");
+        account.setAccountType(request.getAccountType());
         account.setBalance(0.0);
+        account.setStatus(EnumAccountStatus.ACTIVE);
+
+        // Set bank contact details
+        account.setBankAddress("Your Bank Address");
+        account.setBankContactNumber("1800-XXX-XXXX");
+        account.setBankEmail("support@yourbank.com");
+
+        // Set timestamps
+        account.setRegistrationDate(LocalDateTime.now());
+        account.setUpdatedAt(LocalDateTime.now());
+
+        // Create and set user
+        User user = userService.createUser(account);
+        account.setUser(user);
+
+        return accountRepository.save(account);
+    }
+
+    private String generateAccountNumber() {
+        // Generate a 12-digit account number
+        Random random = new Random();
+        StringBuilder accountNumber = new StringBuilder();
+        for (int i = 0; i < 12; i++) {
+            accountNumber.append(random.nextInt(10));
+        }
+        return accountNumber.toString();
     }
 }

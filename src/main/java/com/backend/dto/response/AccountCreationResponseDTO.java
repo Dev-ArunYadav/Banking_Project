@@ -1,6 +1,6 @@
 package com.backend.dto.response;
 
-import com.backend.entity.EnumAccountStatus;
+import com.backend.enums.EnumAccountStatus;
 import lombok.Builder;
 import lombok.Data;
 

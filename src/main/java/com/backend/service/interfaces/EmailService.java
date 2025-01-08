@@ -1,10 +1,8 @@
 package com.backend.service.interfaces;
 
-import com.backend.entity.Account;
-import com.backend.model.AccountCredentials;
+import com.backend.model.Account;
 
 public interface EmailService {
-    void sendWelcomeEmail(Account account, AccountCredentials credentials);
-    void sendOtp(String email, String otp);
-    void sendPasswordResetEmail(String email, String resetToken);
+    void sendCredentialsEmail(String email, Long customerId, String plainPassword);
+    void sendAccountDetailsEmail(Account account);
 }
