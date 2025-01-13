@@ -2,9 +2,8 @@ package com.backend.enums;
 
 public enum EnumAccountStatus {
     PENDING,
-    ACTIVE,
-    INACTIVE,
-    FROZEN,
+    APPROVED,
+    REJECTED,
+    DELETED,
     SUSPENDED,
-    CLOSED
-}
+    UNSUSPENDE}
